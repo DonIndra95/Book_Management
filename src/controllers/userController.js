@@ -1,3 +1,4 @@
+const jwt = require("jsonwebtoken");
 const userModel = require("../models/userModel");
 const {
   isValidRequest,
@@ -123,6 +124,59 @@ const createUser = async function (req, res) {
   }
 };
 
+const userLogin = async function (req, res) {
+  try {
+    // checking for valid input
+    if (!isValidRequest(req.body))
+      return res
+        .status(400)
+        .send({ status: false, message: "Please enter emailId and password" });
+
+    let { email, password } = req.body;
+    // validating email 
+    if (!email)
+      return res
+        .status(400)
+        .send({ status: false, message: "Please enter emailId" });
+
+    if (!isValidMail(email))
+      return res
+        .status(400)
+        .send({ status: false, message: "Please enter valid emailId " });
+    // validating password
+    if (!password)
+      return res
+        .status(400)
+        .send({ status: false, message: "Please enter password" });
+
+    if (!isValidPassword(password))
+      return res
+        .status(400)
+        .send({ status: false, message: "Please enter valid password" });
+    //checking if email and password is correct
+    let checkUser = await userModel.findOne({
+      email: email,
+      password: password,
+    });
+
+    if (!checkUser)
+      return res.status(404).send({ status: false, message: "User not found" });
+    //creating token
+    let token = jwt.sign(
+      {
+        userId: checkUser._id,
+      },
+      "project3group26",
+      { expiresIn: "24h" }
+    );
+
+    res.status(200).send({ status: true, message: "Sucess", data: token });
+  } catch (err) {
+    return res.status(500).send({ status: false, message: err.message });
+  }
+};
+
 module.exports = {
   createUser,
+  userLogin,
 };
