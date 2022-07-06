@@ -45,9 +45,7 @@ const isValidPassword = function (pass) {
 
 //function for ISBN verification
 const isValidISBN = function (isbn) {
-  return /^((?:-13)?:?\ )?(?=[0-9]{13}$|(?=(?:[0-9]+[-\ ]){4})[-\ 0-9]{17}$)97[89][-\ ]?[0-9]{1,5}[-\ ]?[0-9]+[-\ ]?[0-9]+[-\ ]?[0-9]$/.test(
-    isbn
-  );
+  return /^[0-9]{3}[-]{1}[0-9]{10}$/.test(isbn);
 };
 // function for array value verification
 const checkValue = function (value) {

@@ -82,7 +82,7 @@ const createUser = async function (req, res) {
     user.password = password;
 
     // validation of address
-    if (Object.keys(address)) {
+    if (Object.keys(address).length) {
       if (!isValid(address.street))
         return res.status(400).send({
           status: false,
