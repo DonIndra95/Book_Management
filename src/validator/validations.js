@@ -7,7 +7,7 @@ const isValid = function (value) {
 
 // function for name
 const isValidName = function (name) {
-  return /^[a-zA-Z ]{2,30}$/.test(name);
+  return /^[a-zA-Z .]{2,30}$/.test(name);
 };
 
 // function for input request

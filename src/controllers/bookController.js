@@ -32,7 +32,18 @@ const createBook = async function (req, res) {
       return res
         .status(400)
         .send({ status: false, message: "Please enter valid title" });
-    book.title = title;
+    if (title) {
+      title = req.body.title
+        .split(" ")
+        .filter((word) => word)
+        .join(" ");
+      let checkTitle = await bookModel.findOne({ title: title });
+      if (checkTitle)
+        return res
+          .status(409)
+          .send({ status: false, message: `'${title}' is already taken` });
+      book.title = title;
+    }
 
     // excerpt validation
     if (!excerpt)
@@ -43,7 +54,13 @@ const createBook = async function (req, res) {
       return res
         .status(400)
         .send({ status: false, message: "Please enter valid excerpt" });
-    book.excerpt = excerpt;
+    if (excerpt) {
+      excerpt = req.body.excerpt
+        .split(" ")
+        .filter((word) => word)
+        .join(" ");
+      book.excerpt = excerpt;
+    }
 
     // userId validtion
     if (!userId)
@@ -54,15 +71,16 @@ const createBook = async function (req, res) {
       return res
         .status(400)
         .send({ status: false, message: "Please enter valid userId" });
-    if (userId != req.token.userId)
-      return res
-        .status(400)
-        .send({ status: false, message: "You are not authorized" });
     let checkUser = await userModel.findOne({ _id: userId });
     if (!checkUser)
       return res
         .status(400)
         .send({ status: false, message: "User is not present" });
+    if (userId != req.token.userId)
+      return res
+        .status(400)
+        .send({ status: false, message: "You are not authorized" });
+
     book.userId = userId;
 
     // ISBN validation
@@ -78,7 +96,7 @@ const createBook = async function (req, res) {
     if (checkISBN)
       return res
         .status(409)
-        .send({ status: false, message: `${ISBN} already exist` });
+        .send({ status: false, message: `ISBN '${ISBN}' already exist` });
     book.ISBN = ISBN;
 
     // category validation
@@ -189,7 +207,7 @@ const getBooks = async function (req, res) {
     }
     return res
       .status(200)
-      .send({ status: true, message: "Sucess", data: book });
+      .send({ status: true, message: "Book list", data: book });
   } catch (err) {
     return res.status(500).send({ status: false, message: err.message });
   }
