@@ -133,7 +133,7 @@ const userLogin = async function (req, res) {
         .send({ status: false, message: "Please enter emailId and password" });
 
     let { email, password } = req.body;
-    // validating email 
+    // validating email
     if (!email)
       return res
         .status(400)
@@ -169,7 +169,7 @@ const userLogin = async function (req, res) {
       "project3group26",
       { expiresIn: "24h" }
     );
-
+    res.setHeader("x-api-key", token);
     res.status(200).send({ status: true, message: "Sucess", data: token });
   } catch (err) {
     return res.status(500).send({ status: false, message: err.message });
