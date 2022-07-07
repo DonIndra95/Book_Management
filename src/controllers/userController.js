@@ -83,23 +83,30 @@ const createUser = async function (req, res) {
 
     // validation of address
     if (Object.keys(address).length) {
-      if (!isValid(address.street))
-        return res.status(400).send({
-          status: false,
-          message: "Please enter valid Street number",
-        });
+      if (address.street) {
+        if (!isValid(address.street))
+          return res.status(400).send({
+            status: false,
+            message: "Please enter valid Street number",
+          });
+      }
 
-      if (!isValid(address.city))
-        return res.status(400).send({
-          status: false,
-          message: "Please enter valid city name",
-        });
+      if (address.city) {
+        if (!isValid(address.city))
+          return res.status(400).send({
+            status: false,
+            message: "Please enter valid city name",
+          });
+      }
 
-      if (!isValidPincode(address.pincode))
-        return res.status(400).send({
-          status: false,
-          message: "Please enter valid Pincode",
-        });
+      if (address.pincode) {
+        if (!isValidPincode(address.pincode))
+          return res.status(400).send({
+            status: false,
+            message: "Please enter valid Pincode",
+          });
+      }
+
       user.address = address;
     }
 
