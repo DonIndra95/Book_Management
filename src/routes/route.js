@@ -3,6 +3,8 @@ const {
   createBook,
   getBooks,
   getBookById,
+  updateBook,
+  deleteBook,
 } = require("../controllers/bookController");
 const { createUser, userLogin } = require("../controllers/userController");
 const { userAuthentication, authorization } = require("../middlewares/auth");
@@ -16,5 +18,7 @@ router.post("/login", userLogin);
 router.post("/books", userAuthentication, createBook);
 router.get("/books", userAuthentication, getBooks);
 router.get("/books/:bookId", userAuthentication, getBookById);
+router.put("/books/:bookId",userAuthentication,authorization,updateBook)
+router.delete("/books/:bookId",userAuthentication,authorization,deleteBook)
 
 module.exports = router;
