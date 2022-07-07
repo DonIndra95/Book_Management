@@ -1,4 +1,11 @@
 const moment=require("moment")
+
+
+const bookTitle = /^([0-9a-z]([-_\\.]*[0-9a-z]+)*)@([a-z]([-_\\.]*[a-z]+)*)[\\.]([a-z]{2,9})+$/
+
+
+
+
 // function for string verification
 const isValid = function (value) {
   if (typeof value == "undefined" || value == null) return false;
@@ -19,9 +26,7 @@ const isValidRequest = function (data) {
 
 // function for mail verification
 const isValidMail = function (v) {
-  return /^([0-9a-z]([-_\\.]*[0-9a-z]+)*)@([a-z]([-_\\.]*[a-z]+)*)[\\.]([a-z]{2,9})+$/.test(
-    v
-  );
+  return /^([0-9a-z]([-_\\.]*[0-9a-z]+)*)@([a-z]([-_\\.]*[a-z]+)*)[\\.]([a-z]{2,9})+$/.test(v);
 };
 
 // function for mobile verification
@@ -70,6 +75,9 @@ const isValidDate= function(date){
   
 }
 
+const validateBookTitle = (title)=>{
+   return typeof title !==global.string || title.trim()==="" ? 'Invalid Title':global.noError
+}
 
 
 module.exports = {
@@ -83,4 +91,5 @@ module.exports = {
   isValidPincode,
   isValidISBN,
   convertToArray,
+  validateBookTitle,
 };

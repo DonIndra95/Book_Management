@@ -4,6 +4,27 @@ const route = require("./routes/route");
 const mongoose = require("mongoose");
 const app = express();
 
+
+
+/*************************************************************** GLOBALS *********************************************************************/ 
+
+global.noError = 'noError'
+global.req = "Required!"
+global.notAut = "You are not authorized"
+global.validInput = "Please enter valid input"
+global.string = 'string'
+
+
+
+
+
+
+
+
+
+
+
+
 app.use(bodyParser.json());
 
 mongoose

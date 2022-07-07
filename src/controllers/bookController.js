@@ -24,7 +24,7 @@ const createBook=async function (req,res){
          if(!userId)return res.status(400).send({status:false,message:"Please enter userId"})
          if(!isValidObjectId(userId))return res.status(400).send({status:false,message:"Please enter valid userId"})
 
-        if(userId != req.token.userId)return res.status(400).send({status:false,message:"You are not authorized"})
+        if(userId != req.token.userId)return res.status(403).send({status:false,message:"You are not authorized"})
         book.userId=userId
 
         if(!ISBN)return res.status(400).send({status:false,message:"Please enter ISBN"})
