@@ -3,18 +3,18 @@ const ObjectId = mongoose.Schema.Types.ObjectId;
 
 const bookSchema = new mongoose.Schema(
   {
-    title: { type: String, require: true, unique: true },
-    excerpt: { type: String, require: true },
+    title: { type: String, require: true, unique: true, trim: true },
+    excerpt: { type: String, require: true, trim: true },
     userId: {
       type: ObjectId,
       require: true,
       ref: "user",
     },
     ISBN: { type: String, require: true, unique: true },
-    category: { type: String, require: true },
-    subcategory: [{ type: [String], require: true }],
+    category: { type: String, require: true, trim: true },
+    subcategory: { type: [], require: true },
     reviews: { type: Number, default: 0 },
-    deletedAt: { tpye: Date, default: null },
+    deletedAt: { tpye: Date },
     isDeleted: { type: Boolean, default: false },
     releasedAt: { type: String, require: true },
   },
@@ -22,3 +22,5 @@ const bookSchema = new mongoose.Schema(
 );
 
 module.exports = mongoose.model("Book", bookSchema);
+
+//releasedAt:moment(releasedAt).toISOString()

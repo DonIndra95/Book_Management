@@ -73,7 +73,7 @@ const createUser = async function (req, res) {
         status: false,
         message: "Password is required",
       });
-    if (!isValidPassword)
+    if (!isValidPassword(password))
       return res.status(400).send({
         status: false,
         message:
@@ -82,7 +82,7 @@ const createUser = async function (req, res) {
     user.password = password;
 
     // validation of address
-    if (Object.keys(address)) {
+    if (Object.keys(address).length) {
       if (!isValid(address.street))
         return res.status(400).send({
           status: false,
@@ -133,7 +133,7 @@ const userLogin = async function (req, res) {
         .send({ status: false, message: "Please enter emailId and password" });
 
     let { email, password } = req.body;
-    // validating email 
+    // validating email
     if (!email)
       return res
         .status(400)
@@ -169,7 +169,7 @@ const userLogin = async function (req, res) {
       "project3group26",
       { expiresIn: "24h" }
     );
-
+    res.setHeader("x-api-key", token);
     res.status(200).send({ status: true, message: "Sucess", data: token });
   } catch (err) {
     return res.status(500).send({ status: false, message: err.message });
