@@ -1,3 +1,5 @@
+const mongoose = require("mongoose");
+const ObjectId = mongoose.Types.ObjectId;
 const { isValidObjectId } = require("mongoose");
 const bookModel = require("../models/bookModel");
 const userModel = require("../models/userModel");
@@ -80,7 +82,6 @@ const createBook = async function (req, res) {
       return res
         .status(400)
         .send({ status: false, message: "You are not authorized" });
-
     book.userId = userId;
 
     // ISBN validation
@@ -134,7 +135,7 @@ const createBook = async function (req, res) {
         status: false,
         message: "Please enter valid release date in YYYY-MM-DD format",
       });
-    book.releasedAt = releasedAt;
+    book.releasedAt = releasedAt.slice(0, 10);
 
     const savedData = await bookModel.create(book);
     res.status(201).send({ status: true, message: "Sucess", data: savedData });
@@ -143,7 +144,7 @@ const createBook = async function (req, res) {
   }
 };
 
-// --------------------------------------Get book--------------------------------------
+// --------------------------------------Get book by query params--------------------------------------
 const getBooks = async function (req, res) {
   try {
     // checking for data in body
@@ -213,7 +214,58 @@ const getBooks = async function (req, res) {
   }
 };
 
+// -------------------------------------get book by ID-------------------------------------
+const getBookById = async function (req, res) {
+  try {
+    let bookId = req.params.bookId;
+    if (!bookId)
+      return res
+        .status(400)
+        .send({ status: false, msg: "Please enter book ID in params" });
+
+    if (!isValidObjectId(bookId))
+      return res
+        .status(400)
+        .send({ status: false, msg: "Please enter valid book ID" });
+
+    const book = await bookModel.aggregate([
+      {
+        $match: {
+          _id: ObjectId(bookId),
+          isDeleted: false,
+        },
+      },
+      {
+        $lookup: {
+          from: "reviews",
+          localField: "_id",
+          foreignField: "bookId",
+          as: "reviewsData",
+        },
+      },
+      {
+        $project: {
+          ISBN: 0,
+          __v: 0,
+        },
+      },
+    ]);
+
+    if (!book)
+      return res
+        .status(404)
+        .send({ status: false, msg: "No sunch book found" });
+
+    res
+      .status(200)
+      .send({ status: true, message: "Books list", data: book[0] });
+  } catch (err) {
+    return res.status(500).send({ status: false, message: err.message });
+  }
+};
+
 module.exports = {
   createBook,
   getBooks,
+  getBookById,
 };

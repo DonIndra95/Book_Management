@@ -73,7 +73,7 @@ const createUser = async function (req, res) {
         status: false,
         message: "Password is required",
       });
-    if (!isValidPassword)
+    if (!isValidPassword(password))
       return res.status(400).send({
         status: false,
         message:
