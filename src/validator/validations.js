@@ -1,4 +1,7 @@
 // function for string verification
+const mongoose = require("mongoose");
+const ObjectId = mongoose.Types.ObjectId;
+const { isValidObjectId } = require("mongoose");
 const isValid = function (value) {
   if (typeof value == "undefined" || value == null) return false;
   if (typeof value == "string" && value.trim().length == 0) return false;
@@ -9,6 +12,8 @@ const isValid = function (value) {
 const isValidName = function (name) {
   return /^[a-zA-Z .]{2,30}$/.test(name);
 };
+
+
 
 // function for input request
 const isValidRequest = function (data) {
@@ -73,7 +78,19 @@ function isValidDate(dateString) {
   return d.toISOString().slice(0, 10) === dateString;
 }
 
+const checkObjectId = (id)=>{
+  return isValidObjectId(id)?"No Eroor":"Invalid BookId";
+}
+
+
+
+
+
+
+
+
 module.exports = {
+  checkObjectId,
   isValid,
   isValidMail,
   isValidMobile,
