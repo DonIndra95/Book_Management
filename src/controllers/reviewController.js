@@ -79,7 +79,8 @@ const createReview = async (req, res) => {
 };
 
 const reviewDeleteById = async (req, res) => {
-  if (!req.params.bookId || !isValidObjectId(req.params.bookId))
+   try{
+    if (!req.params.bookId || !isValidObjectId(req.params.bookId))
     return res.status(400).send({ status: false, message: "Invalid BookId" });
   if (!req.params.reviewId || !isValidObjectId(req.params.reviewId))
     return res.status(400).send({ status: false, message: "Invalid ReviewId" });
@@ -87,12 +88,15 @@ const reviewDeleteById = async (req, res) => {
   if (!(await bookModel.findOne({ _id: req.params.bookId, isDeleted: false })))
     return res.status(404).send({ status: false, message: "BookId Not Exist" });
 
-  if (
-    !(await reviewModel.findOne({ _id: req.params.reviewId, isDeleted: false }))
-  )
-    return res
-      .status(404)
-      .send({ status: false, message: "ReviewId Not Exist" });
+
+
+
+    
+//   if ( !(await reviewModel.findOne({ _id: req.params.reviewId, bookId: req.params.bookId, isDeleted: false })))
+
+//     return res
+//       .status(404)
+//       .send({ status: false, message: "ReviewId Not Exist" });
 
   let data = await reviewModel.updateOne(
     { _id: req.params.reviewId, bookId: req.params.bookId, isDeleted: false },
@@ -100,13 +104,27 @@ const reviewDeleteById = async (req, res) => {
   );
 
   if (data.matchedCount === 0)
-    return res.status(500).send({ status: false, message: err.message });
+  return res
+  .status(404)
+  .send({ status: false, message: "Review Not Exist" });
 
   book = await bookModel.findOneAndUpdate(
-    { _id: review.bookId },
+    { _id: req.params.bookId },
     { $inc: { reviews: -1 } },
     { new: true }
   );
-};
+
+  return res
+  .status(200)
+  .send({ status: true, message: "Review is deleted" });
+   
+
+   } catch(err){
+
+    return res.status(500).send({ status: false, message: err.message });
+
+   }
+}
 
 module.exports.createReview = createReview;
+module.exports.reviewDeleteById = reviewDeleteById

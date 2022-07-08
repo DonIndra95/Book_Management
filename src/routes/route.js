@@ -8,7 +8,7 @@ const {
 } = require("../controllers/bookController");
 const { createUser, userLogin } = require("../controllers/userController");
 const { userAuthentication, authorization } = require("../middlewares/auth");
-const {createReview} = require('../controllers/reviewController')
+const {createReview,reviewDeleteById} = require('../controllers/reviewController')
 const router = express.Router();
 
 // user API
@@ -26,5 +26,6 @@ router.delete("/books/:bookId",userAuthentication,authorization,deleteBook)
 // REVIEW API
 
 router.post("/books/:bookId/review",createReview)
+router.delete("/books/:bookId/review/:reviewId",reviewDeleteById)
 
 module.exports = router;
