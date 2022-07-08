@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const validator = require("validator");
 const ObjectId = mongoose.Types.ObjectId;
 const { isValidObjectId } = require("mongoose");
 const bookModel = require("../models/bookModel");
@@ -6,7 +7,6 @@ const userModel = require("../models/userModel");
 const {
   isValidRequest,
   isValid,
-  isValidISBN,
   isValidName,
   convertToArray,
   isValidDate,
@@ -89,10 +89,11 @@ const createBook = async function (req, res) {
       return res
         .status(400)
         .send({ status: false, message: "Please enter ISBN" });
-    if (!isValidISBN(ISBN))
+    if (!validator.isISBN(ISBN))
       return res
         .status(400)
         .send({ status: false, message: "Please enter valid ISBN " });
+    ISBN = ISBN.replaceAll("-", "");
     let checkISBN = await bookModel.findOne({ ISBN: ISBN });
     if (checkISBN)
       return res
@@ -154,16 +155,29 @@ const getBooks = async function (req, res) {
         message: "Please enter valid input in query params",
       });
 
-    // validating input in query params
-    if (!isValidRequest(req.query))
-      return res
-        .status(400)
-        .send({ status: false, message: "Please enter valid input" });
+    // // validating input in query params
+    // if (!isValidRequest(req.query))
+    //   return res
+    //     .status(400)
+    //     .send({ status: false, message: "Please enter valid input" });
 
     let { userId, category, subcategory } = req.query;
-    let query = { isDeleted: false };
+    let query = {};
 
-    if (userId) {
+    let params = Object.keys(req.query);
+    if (params.length) {
+      let output = params.filter((ele) =>
+        ["userId", "category", "subcategory"].includes(ele)
+      );
+      if (!output.length)
+        return res.status(400).send({
+          status: false,
+          message: "Please enter valid input in query",
+        });
+    }
+
+    //console.log(typeof req.query.userId);
+    if (userId !== undefined) {
       if (!isValidObjectId(userId))
         return res
           .status(400)
@@ -171,8 +185,8 @@ const getBooks = async function (req, res) {
       query.userId = userId;
     }
 
-    if (category) {
-      if (!isValidName(category))
+    if (category !== undefined) {
+      if (category.trim() === "" || !isValidName(category))
         return res
           .status(400)
           .send({ status: false, message: "Please enter valid category" });
@@ -180,15 +194,21 @@ const getBooks = async function (req, res) {
     }
 
     // checking for subcategory
-    if (subcategory) {
+    if (subcategory !== undefined) {
       if (subcategory.trim().length) {
-        const subArr = subcategory.split(",").map((tag) => tag.trim());
-        query.subcategory = { $in: subArr };
+        const subArr = subcategory
+          .trim()
+          .split(",")
+          .map((tag) => tag.trim());
+        query.subcategory = { $all: subArr };
       } else
         return res
           .status(400)
           .send({ status: false, msg: "Please enter valid subcategory" });
     }
+
+    query.isDeleted = false;
+    console.log(query);
 
     // serach query on book Model
     const book = await bookModel
@@ -303,10 +323,11 @@ const updateBook = async function (req, res) {
     }
 
     if (ISBN) {
-      if (!isValidISBN(ISBN))
+      if (!validator.isISBN(ISBN))
         return res
           .status(400)
           .send({ status: false, message: "Please enter valid ISBN " });
+      ISBN = ISBN.replaceAll("-", "");
       let checkISBN = await bookModel.findOne({ ISBN: ISBN });
       if (checkISBN)
         return res
