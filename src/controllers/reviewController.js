@@ -54,7 +54,7 @@ const createReview = async (req, res) => {
     review.rating = Math.round(req.body.rating);
 
     let data = await reviewModel.updateOne(
-      { rating: review.rating, reviewedBy: review.reviewedBy },
+      { rating: review.rating, reviewedBy: review.reviewedBy,isDeleted:false },
       review,
       { upsert: true, new: true }
     );
@@ -69,7 +69,7 @@ const createReview = async (req, res) => {
         { new: true }
       );
     book._doc.reviewsData = await reviewModel.find(
-      { bookId: book._id },
+      { bookId: book._id,isDeleted:false},
       { __v: 0 }
     );
     res.status(201).send({ status: true, message: "Books List", data: book });
@@ -87,22 +87,11 @@ const reviewDeleteById = async (req, res) => {
 
   if (!(await bookModel.findOne({ _id: req.params.bookId, isDeleted: false })))
     return res.status(404).send({ status: false, message: "BookId Not Exist" });
-
-
-
-
     
-//   if ( !(await reviewModel.findOne({ _id: req.params.reviewId, bookId: req.params.bookId, isDeleted: false })))
-
-//     return res
-//       .status(404)
-//       .send({ status: false, message: "ReviewId Not Exist" });
-
   let data = await reviewModel.updateOne(
     { _id: req.params.reviewId, bookId: req.params.bookId, isDeleted: false },
     { isDeleted: true }
   );
-
   if (data.matchedCount === 0)
   return res
   .status(404)
@@ -126,5 +115,82 @@ const reviewDeleteById = async (req, res) => {
    }
 }
 
-module.exports.createReview = createReview;
-module.exports.reviewDeleteById = reviewDeleteById
+const updateReview=async (req, res) => {
+  try{
+
+    if (validators.isValidRequest(req.query)||!validators.isValidRequest(req.body))
+      return res.status(400).send({
+        status: false,
+        message: "Please enter valid input in body",
+      });
+      
+
+      let {review,rating,reviewedBy}=req.body
+      let body=Object.keys(req.body)
+      if (body.length) {
+        let output = body.filter((ele) =>["review", "rating", "reviewedBy"].includes(ele));
+        if (!output.length)
+          return res.status(400).send({
+            status: false,
+            message: "Please enter valid input in body",
+          });
+      }
+      let updateReviews={}
+
+      if (review) {
+        if (validators.isValid(review))
+          updateReviews.review = review
+            .split(" ")
+            .filter((e) => e)
+            .join(" ");
+        else
+          return res
+            .status(400)
+            .send({ status: false, message: "Invalid review" });
+      }
+      if (rating ){
+      if(!(Number(rating) >= 1 && Number(rating) <= 5))
+        return res.status(400).send({ status: false, message: "Invalid Rating" });
+        updateReviews.rating=rating
+      }
+  
+      if (reviewedBy) {
+        reviewedBy = reviewedBy
+          .split(" ")
+          .filter((e) => e)
+          .join(" ");
+        if (validators.isValidName(reviewedBy))
+          updateReviews.reviewedBy = reviewedBy;
+        else
+          return res
+            .status(400)
+            .send({ status: false, message: "Invalid reviewer Name" });
+      }
+
+      let {bookId,reviewId}=req.params
+
+      if(!isValidObjectId(bookId))return res
+      .status(400)
+      .send({ status: false, message: "Invalid BookId" });
+
+      if(!isValidObjectId(reviewId))return res
+      .status(400)
+      .send({ status: false, message: "Invalid reviewId" });
+
+      let updatedReview= await reviewModel.findOneAndUpdate({_id:reviewId,bookId:bookId,isDeleted:false},updateReviews,{new:true})
+
+      if(!updatedReview)
+      return res
+      .status(404)
+      .send({ status: false, message: "Review not found" });
+
+      res.status(200).send({status: true, message: "Success",data:updatedReview})   
+
+
+  }catch(err){
+    return res.status(500).send({ status: false, message: err.message });
+
+   }
+}
+
+module.exports={createReview,reviewDeleteById,updateReview};

@@ -156,12 +156,6 @@ const getBooks = async function (req, res) {
         message: "Please enter valid input in query params",
       });
 
-    // // validating input in query params
-    // if (!isValidRequest(req.query))
-    //   return res
-    //     .status(400)
-    //     .send({ status: false, message: "Please enter valid input" });
-
     let { userId, category, subcategory } = req.query;
     let query = {};
 

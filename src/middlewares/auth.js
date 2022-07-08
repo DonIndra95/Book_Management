@@ -15,7 +15,7 @@ const userAuthentication = async function (req, res, next) {
     // validating the token
     jwt.verify(token, "project3group26", function (err, decoded) {
       if (err)
-        return res.status(401).send({ status: false, msg: "token is invalid" });
+        return res.status(401).send({ status: false, message: "token is invalid" });
       else {
         // creating an attribute in "req" to access the token outside the middleware
         req.token = decoded;
@@ -23,7 +23,7 @@ const userAuthentication = async function (req, res, next) {
       }
     });
   } catch (err) {
-    return res.status(500).send({ status: false, msg: err.message });
+    return res.status(500).send({ status: false, message: err.message });
   }
 };
 
@@ -36,7 +36,7 @@ const authorization = async function (req, res, next) {
     if (!mongoose.Types.ObjectId.isValid(bookId))
       return res
         .status(400)
-        .send({ status: false, msg: "Please enter valid bookId" });
+        .send({ status: false, message: "Please enter valid bookId" });
     // Book validation
     let book = await bookModel.findOne({
       _id: bookId,
@@ -45,20 +45,20 @@ const authorization = async function (req, res, next) {
     if (!book) {
       return res
         .status(404)
-        .send({ status: false, msg: "No such book exists" });
+        .send({ status: false, message: "No such book exists" });
     }
     // token validation
     if (userLoggedIn != book.userId)
       return res.status(403).send({
         status: false,
-        msg: "You are not authorized to perform this task",
+        message: "You are not authorized to perform this task",
       });
 
     // creating an attribute in "req" to access the blog data outside the middleware
     req.book = book;
     next();
   } catch (err) {
-    return res.status(401).send({ status: false, msg: "token is invalid" });
+    return res.status(401).send({ status: false, message: "token is invalid" });
   }
 };
 
