@@ -10,6 +10,7 @@ const {
   isValidName,
   convertToArray,
   isValidDate,
+  changeIsbn10To13,
 } = require("../validator/validations");
 
 // --------------------------------------Create book--------------------------------------
@@ -93,7 +94,7 @@ const createBook = async function (req, res) {
       return res
         .status(400)
         .send({ status: false, message: "Please enter valid ISBN " });
-    ISBN = ISBN.replaceAll("-", "");
+    ISBN = changeIsbn10To13(ISBN);
     let checkISBN = await bookModel.findOne({ ISBN: ISBN });
     if (checkISBN)
       return res
@@ -327,7 +328,7 @@ const updateBook = async function (req, res) {
         return res
           .status(400)
           .send({ status: false, message: "Please enter valid ISBN " });
-      ISBN = ISBN.replaceAll("-", "");
+      ISBN = changeIsbn10To13(ISBN);
       let checkISBN = await bookModel.findOne({ ISBN: ISBN });
       if (checkISBN)
         return res

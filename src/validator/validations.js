@@ -78,6 +78,27 @@ const checkObjectId = (id) => {
   return isValidObjectId(id) ? "No Eroor" : "Invalid BookId";
 };
 
+const changeIsbn10To13 = (isbn) => {
+  isbn = isbn.replaceAll("-", "");
+  if (isbn.length == 13) return isbn;
+  let sum = 0;
+  let prefix = "978";
+  let newIsbn = (prefix + isbn)
+    .split("")
+    .map((e) => parseInt(e))
+    .slice(0, -1);
+
+  newIsbn.forEach((e, i) => {
+    if (i % 2 == 0) {
+      sum += e * 1;
+    } else {
+      sum += e * 3;
+    }
+  });
+  newIsbn.push(10 - (sum % 10));
+  return newIsbn.join("");
+};
+
 module.exports = {
   checkObjectId,
   isValid,
@@ -90,4 +111,5 @@ module.exports = {
   isValidPincode,
   convertToArray,
   isValidDate,
+  changeIsbn10To13,
 };
