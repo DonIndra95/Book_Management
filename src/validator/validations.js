@@ -35,8 +35,6 @@ const isValidName = function (name) {
   return /^[a-zA-Z .]{2,30}$/.test(name);
 };
 
-
-
 // function for input request
 const isValidRequest = function (data) {
   if (Object.keys(data).length == 0) return false;
@@ -45,7 +43,9 @@ const isValidRequest = function (data) {
 
 // function for mail verification
 const isValidMail = function (v) {
-  return /^([0-9a-z]([-_\\.]*[0-9a-z]+)*)@([a-z]([-_\\.]*[a-z]+)*)[\\.]([a-z]{2,9})+$/.test(v);
+  return /^([0-9a-z]([-_\\.]*[0-9a-z]+)*)@([a-z]([-_\\.]*[a-z]+)*)[\\.]([a-z]{2,9})+$/.test(
+    v
+  );
 };
 
 // function for mobile verification
@@ -68,10 +68,6 @@ const isValidPassword = function (pass) {
   return /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,15}$/.test(pass);
 };
 
-//function for ISBN verification
-const isValidISBN = function (isbn) {
-  return /^[0-9]{3}[-]{1}[0-9]{10}$/.test(isbn);
-};
 // function for array value verification
 const checkValue = function (value) {
   let arrValue = [];
@@ -100,16 +96,30 @@ function isValidDate(dateString) {
   return d.toISOString().slice(0, 10) === dateString;
 }
 
-const checkObjectId = (id)=>{
-  return isValidObjectId(id)?"No Eroor":"Invalid BookId";
-}
+const checkObjectId = (id) => {
+  return isValidObjectId(id) ? "No Eroor" : "Invalid BookId";
+};
 
+const changeIsbn10To13 = (isbn) => {
+  isbn = isbn.replaceAll("-", "");
+  if (isbn.length == 13) return isbn;
+  let sum = 0;
+  let prefix = "978";
+  let newIsbn = (prefix + isbn)
+    .split("")
+    .map((e) => parseInt(e))
+    .slice(0, -1);
 
-
-
-
-
-
+  newIsbn.forEach((e, i) => {
+    if (i % 2 == 0) {
+      sum += e * 1;
+    } else {
+      sum += e * 3;
+    }
+  });
+  newIsbn.push(10 - (sum % 10));
+  return newIsbn.join("");
+};
 
 module.exports = {
   checkObjectId,
@@ -121,7 +131,7 @@ module.exports = {
   isValidTitle,
   isValidPassword,
   isValidPincode,
-  isValidISBN,
   convertToArray,
   isValidDate,
+  changeIsbn10To13,
 };
