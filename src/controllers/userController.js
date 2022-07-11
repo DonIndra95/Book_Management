@@ -82,7 +82,7 @@ const createUser = async function (req, res) {
     user.password = password;
 
     // validation of address
-    if (Object.keys(address).length) {
+    if (address&&Object.keys(address).length) {
       if (address.street) {
         if (!isValid(address.street))
           return res.status(400).send({
@@ -127,6 +127,7 @@ const createUser = async function (req, res) {
     const savedData = await userModel.create(user);
     res.status(201).send({ status: true, message: "Sucess", data: savedData });
   } catch (err) {
+    console.log(err)
     return res.status(500).send({ status: false, message: err.message });
   }
 };
@@ -140,6 +141,7 @@ const userLogin = async function (req, res) {
         .send({ status: false, message: "Please enter emailId and password" });
 
     let { email, password } = req.body;
+    console.log(email)
     // validating email
     if (!email)
       return res

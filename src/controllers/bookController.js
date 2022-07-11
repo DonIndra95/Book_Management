@@ -64,13 +64,13 @@ const createBook = async function (req, res) {
         .join(" ");
       book.excerpt = excerpt;
     }
-
     // userId validtion
     if (!userId)
       return res
         .status(400)
         .send({ status: false, message: "Please enter userId" });
-    if (!isValidObjectId(userId))
+        
+    if (typeof userId !="string"||!isValidObjectId(userId))
       return res
         .status(400)
         .send({ status: false, message: "Please enter valid userId" });
@@ -90,7 +90,7 @@ const createBook = async function (req, res) {
       return res
         .status(400)
         .send({ status: false, message: "Please enter ISBN" });
-    if (!validator.isISBN(ISBN))
+    if (typeof ISBN !="string"||!validator.isISBN(ISBN))
       return res
         .status(400)
         .send({ status: false, message: "Please enter valid ISBN " });
@@ -120,6 +120,7 @@ const createBook = async function (req, res) {
         .send({ status: false, message: "Please enter subcategory" });
     if (subcategory) {
       let sub = convertToArray(subcategory);
+      console.log(sub)
       if (!sub)
         return res
           .status(400)
@@ -142,6 +143,7 @@ const createBook = async function (req, res) {
     const savedData = await bookModel.create(book);
     res.status(201).send({ status: true, message: "Sucess", data: savedData });
   } catch (err) {
+    console.log(err)
     return res.status(500).send({ status: false, message: err.message });
   }
 };

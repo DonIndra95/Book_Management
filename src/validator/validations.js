@@ -18,7 +18,7 @@ const isValidRequest = function (data) {
 
 // function for mail verification
 const isValidMail = function (v) {
-  return /^([0-9a-z]([-_\\.]*[0-9a-z]+)*)@([a-z]([-_\\.]*[a-z]+)*)[\\.]([a-z]{2,9})+$/.test(
+  return /^([0-9a-zA-Z]([-_\\.]*[0-9a-zA-Z]+)*)@([a-z]([-_\\.]*[a-z]+)*)[\\.]([a-z]{2,9})+$/.test(
     v
   );
 };
@@ -47,15 +47,15 @@ const isValidPassword = function (pass) {
 const checkValue = function (value) {
   let arrValue = [];
   value.map((x) => {
-    if (x.trim().length) arrValue.push(x);
+    if (x.trim().length&&/^[a-zA-Z .,]$/.test(x)) arrValue.push(x);
   });
   return arrValue.length ? arrValue : false;
 };
 
 // function for converting string into array
 const convertToArray = function (value) {
-  if (typeof value == "string" && value) {
-    if (value.trim().length == 0) return false;
+  if (typeof value === "string" && value ) {
+    if (!/^[a-zA-Z .,]$/.test(value)||value.trim().length == 0) return false;
     return value.split(",");
   } else if (value?.length > 0) return checkValue(value);
   return false;
