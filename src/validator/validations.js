@@ -1,6 +1,7 @@
 // function for string verification
 const isValid = function (value) {
   if (typeof value == "undefined" || value == null) return false;
+  if(value.length==0)return false;
   if (typeof value == "string" && value.trim().length == 0) return false;
   else if (typeof value == "string") return true;
 };
@@ -47,16 +48,19 @@ const isValidPassword = function (pass) {
 const checkValue = function (value) {
   let arrValue = [];
   value.map((x) => {
-    if (x.trim().length&&/^[a-zA-Z .,]$/.test(x)) arrValue.push(x);
+    if (x.trim().length&&/^[a-zA-Z .,]{2,}$/.test(x)) arrValue.push(x);
   });
   return arrValue.length ? arrValue : false;
 };
 
 // function for converting string into array
 const convertToArray = function (value) {
-  if (typeof value === "string" && value ) {
-    if (!/^[a-zA-Z .,]$/.test(value)||value.trim().length == 0) return false;
-    return value.split(",");
+  if (typeof value === "string" && value) {
+    if(value.trim().length == 0)return false;
+
+    if (!(/^[a-zA-Z .,]{2,}$/.test(value)))return false;
+
+    return value.split(",").filter(x=> x);
   } else if (value?.length > 0) return checkValue(value);
   return false;
 };
@@ -64,10 +68,11 @@ const convertToArray = function (value) {
 // function for validation of date
 function isValidDate(dateString) {
   var regEx = /^\d{4}-\d{2}-\d{2}$/;
+  if(typeof dateString !== "string")return false;
   if (!dateString.match(regEx)) return false; // Invalid format
   var d = new Date(dateString);
   var dNum = d.getTime();
-  console.log(dNum)
+  if (dNum>Date.now())return false;
   if (!dNum && dNum !== 0) return false; // NaN value, Invalid date
   return d.toISOString().slice(0,10) === dateString;
 }

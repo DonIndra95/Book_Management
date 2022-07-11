@@ -69,8 +69,8 @@ const createBook = async function (req, res) {
       return res
         .status(400)
         .send({ status: false, message: "Please enter userId" });
-        
-    if (typeof userId !="string"||!isValidObjectId(userId))
+
+    if (typeof userId != "string" || !isValidObjectId(userId))
       return res
         .status(400)
         .send({ status: false, message: "Please enter valid userId" });
@@ -90,7 +90,7 @@ const createBook = async function (req, res) {
       return res
         .status(400)
         .send({ status: false, message: "Please enter ISBN" });
-    if (typeof ISBN !="string"||!validator.isISBN(ISBN))
+    if (typeof ISBN != "string" || !validator.isISBN(ISBN))
       return res
         .status(400)
         .send({ status: false, message: "Please enter valid ISBN " });
@@ -120,7 +120,7 @@ const createBook = async function (req, res) {
         .send({ status: false, message: "Please enter subcategory" });
     if (subcategory) {
       let sub = convertToArray(subcategory);
-      console.log(sub)
+      console.log(sub);
       if (!sub)
         return res
           .status(400)
@@ -143,7 +143,7 @@ const createBook = async function (req, res) {
     const savedData = await bookModel.create(book);
     res.status(201).send({ status: true, message: "Sucess", data: savedData });
   } catch (err) {
-    console.log(err)
+    console.log(err);
     return res.status(500).send({ status: false, message: err.message });
   }
 };
@@ -246,7 +246,6 @@ const getBookById = async function (req, res) {
         .send({ status: false, msg: "Please enter valid book ID" });
 
     const book = await bookModel.aggregate([
-      
       {
         $lookup: {
           from: "reviews",
@@ -255,37 +254,44 @@ const getBookById = async function (req, res) {
           as: "reviewsData",
         },
       },
-      {$unwind:"$reviewsData"},
+      { $unwind: { path: "$reviewsData", preserveNullAndEmptyArrays: true } },
       {
         $match: {
           _id: ObjectId(bookId),
           isDeleted: false,
-          "reviewsData.isDeleted":false
+          $or: [
+            {
+              "reviewsData.isDeleted": { $exists: false },
+            },
+            {
+              "reviewsData.isDeleted": false,
+            },
+          ],
         },
       },
       {
-        $group:{
-          _id:"$_id",
-          title:{$first:"$title"},
-          excerpt:{$first:"$excerpt"},
-          userId:{$first:"$userId"},
-          category:{$first:"$category"},
-          subcategory:{$first:"$subcategory"},
-          reviews:{$first:"$reviews"},
-          isDeleted:{$first:"$isDeleted"},
-          releasedAt:{$first:"$releasedAt"},
-          createdAt:{$first:"$createdAt"},
-          updatedAt:{$first:"$updatedAt"},
-          reviewsData:{$push:"$reviewsData"}
-        }
+        $group: {
+          _id: "$_id",
+          title: { $first: "$title" },
+          excerpt: { $first: "$excerpt" },
+          userId: { $first: "$userId" },
+          category: { $first: "$category" },
+          subcategory: { $first: "$subcategory" },
+          reviews: { $first: "$reviews" },
+          isDeleted: { $first: "$isDeleted" },
+          releasedAt: { $first: "$releasedAt" },
+          createdAt: { $first: "$createdAt" },
+          updatedAt: { $first: "$updatedAt" },
+          reviewsData: { $push: "$reviewsData" },
+        },
       },
 
       {
         $project: {
           ISBN: 0,
           __v: 0,
-          "reviewsData.__v":0,
-          "reviewsData.isDeleted":0
+          "reviewsData.__v": 0,
+          "reviewsData.isDeleted": 0,
         },
       },
     ]);
@@ -313,9 +319,24 @@ const updateBook = async function (req, res) {
         .status(400)
         .send({ status: false, message: "Please enter valid input" });
 
+    let body = Object.keys(req.body);
+    if (body.length) {
+      let output = body.filter((ele) =>
+        ["title", "excerpt", "releasedAt","ISBN"].includes(ele)
+      );
+      if (!output.length)
+        return res.status(400).send({
+          status: false,
+          message: "Please enter valid input in body",
+        });
+    }
+
     let { title, excerpt, ISBN, releasedAt } = req.body;
 
     let book = {};
+    if(title?.length==0)return res
+    .status(400)
+    .send({ status: false, message: "Please enter title" });
 
     if (title) {
       if (!isValid(title))
@@ -330,6 +351,9 @@ const updateBook = async function (req, res) {
       book.title = title;
     }
 
+    if(excerpt?.length==0)return res
+    .status(400)
+    .send({ status: false, message: "Please enter excerpt" });
     if (excerpt) {
       if (!isValid(excerpt))
         return res
@@ -340,9 +364,11 @@ const updateBook = async function (req, res) {
         .filter((word) => word)
         .join(" ");
     }
-
+    if(ISBN?.length==0)return res
+    .status(400)
+    .send({ status: false, message: "Please enter ISBN" });
     if (ISBN) {
-      if (!validator.isISBN(ISBN))
+      if (typeof ISBN != "string" ||!validator.isISBN(ISBN))
         return res
           .status(400)
           .send({ status: false, message: "Please enter valid ISBN " });
@@ -354,7 +380,9 @@ const updateBook = async function (req, res) {
           .send({ status: false, message: `ISBN '${ISBN}' already exist` });
       book.ISBN = ISBN;
     }
-
+    if(releasedAt?.length==0)return res
+    .status(400)
+    .send({ status: false, message: "Please enter releasedAt" });
     if (releasedAt) {
       if (!isValidDate(releasedAt))
         return res.status(400).send({
