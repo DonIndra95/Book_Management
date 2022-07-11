@@ -123,7 +123,16 @@ const updateReview=async (req, res) => {
         status: false,
         message: "Please enter valid input in body",
       });
-      
+
+      let {bookId,reviewId}=req.params
+
+      if(!isValidObjectId(bookId))return res
+      .status(400)
+      .send({ status: false, message: "Invalid BookId" });
+
+      if(!isValidObjectId(reviewId))return res
+      .status(400)
+      .send({ status: false, message: "Invalid reviewId" });      
 
       let {review,rating,reviewedBy}=req.body
       let body=Object.keys(req.body)
@@ -166,16 +175,6 @@ const updateReview=async (req, res) => {
             .status(400)
             .send({ status: false, message: "Invalid reviewer Name" });
       }
-
-      let {bookId,reviewId}=req.params
-
-      if(!isValidObjectId(bookId))return res
-      .status(400)
-      .send({ status: false, message: "Invalid BookId" });
-
-      if(!isValidObjectId(reviewId))return res
-      .status(400)
-      .send({ status: false, message: "Invalid reviewId" });
 
       let updatedReview= await reviewModel.findOneAndUpdate({_id:reviewId,bookId:bookId,isDeleted:false},updateReviews,{new:true})
 
