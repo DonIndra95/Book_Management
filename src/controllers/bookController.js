@@ -244,12 +244,7 @@ const getBookById = async function (req, res) {
         .send({ status: false, msg: "Please enter valid book ID" });
 
     const book = await bookModel.aggregate([
-      {
-        $match: {
-          _id: ObjectId(bookId),
-          isDeleted: false,
-        },
-      },
+      
       {
         $lookup: {
           from: "reviews",
@@ -258,10 +253,37 @@ const getBookById = async function (req, res) {
           as: "reviewsData",
         },
       },
+      {$unwind:"$reviewsData"},
+      {
+        $match: {
+          _id: ObjectId(bookId),
+          isDeleted: false,
+          "reviewsData.isDeleted":false
+        },
+      },
+      {
+        $group:{
+          _id:"$_id",
+          title:{$first:"$title"},
+          excerpt:{$first:"$excerpt"},
+          userId:{$first:"$userId"},
+          category:{$first:"$category"},
+          subcategory:{$first:"$subcategory"},
+          reviews:{$first:"$reviews"},
+          isDeleted:{$first:"$isDeleted"},
+          releasedAt:{$first:"$releasedAt"},
+          createdAt:{$first:"$createdAt"},
+          updatedAt:{$first:"$updatedAt"},
+          reviewsData:{$push:"$reviewsData"}
+        }
+      },
+
       {
         $project: {
           ISBN: 0,
           __v: 0,
+          "reviewsData.__v":0,
+          "reviewsData.isDeleted":0
         },
       },
     ]);

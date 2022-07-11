@@ -1,8 +1,4 @@
 // function for string verification
-const mongoose = require("mongoose");
-const ObjectId = mongoose.Types.ObjectId;
-const { isValidObjectId } = require("mongoose");
-
 const isValid = function (value) {
   if (typeof value == "undefined" || value == null) return false;
   if (typeof value == "string" && value.trim().length == 0) return false;
@@ -60,7 +56,7 @@ const checkValue = function (value) {
 const convertToArray = function (value) {
   if (typeof value == "string" && value) {
     if (value.trim().length == 0) return false;
-    return [value];
+    return value.split(",");
   } else if (value?.length > 0) return checkValue(value);
   return false;
 };
@@ -71,13 +67,10 @@ function isValidDate(dateString) {
   if (!dateString.match(regEx)) return false; // Invalid format
   var d = new Date(dateString);
   var dNum = d.getTime();
+  console.log(dNum)
   if (!dNum && dNum !== 0) return false; // NaN value, Invalid date
-  return d.toISOString().slice(0, 10) === dateString;
+  return d.toISOString().slice(0,10) === dateString;
 }
-
-const checkObjectId = (id) => {
-  return isValidObjectId(id) ? "No Eroor" : "Invalid BookId";
-};
 
 const changeIsbn10To13 = (isbn) => {
   isbn = isbn.replaceAll("-", "");
@@ -101,7 +94,6 @@ const changeIsbn10To13 = (isbn) => {
 };
 
 module.exports = {
-  checkObjectId,
   isValid,
   isValidMail,
   isValidMobile,

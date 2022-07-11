@@ -18,7 +18,7 @@ const createReview = async (req, res) => {
       !(Number(req.body.rating) >= 1 && Number(req.body.rating) <= 5)
     )
       return res.status(400).send({ status: false, message: "Invalid Rating" });
-
+    if(!req.body.reviewedBy)review.reviewedBy="Guest"
     if (req.body.reviewedBy) {
       req.body.reviewedBy = req.body.reviewedBy
         .split(" ")
@@ -43,35 +43,23 @@ const createReview = async (req, res) => {
           .send({ status: false, message: "Invalid review" });
     }
 
-    if (
-      !(await bookModel.findOne({ _id: req.params.bookId, isDeleted: false }))
-    )
+    if (!(await bookModel.findOne({ _id: req.params.bookId, isDeleted: false })))
       return res
         .status(404)
         .send({ status: false, message: "BookId Not Exist" });
 
     review.bookId = req.params.bookId;
-    review.rating = Math.round(req.body.rating);
+    review.rating = Math.round(req.body.rating*10)/10;
 
-    let data = await reviewModel.updateOne(
-      { rating: review.rating, reviewedBy: review.reviewedBy,isDeleted:false },
-      review,
-      { upsert: true, new: true }
-    );
-    let book = await bookModel.findOne(
-      { _id: review.bookId },
-      { __v: 0, ISBN: 0 }
-    );
-    if (data.matchedCount === 0)
-      book = await bookModel.findOneAndUpdate(
+    let data = await reviewModel.create(review);
+    //let book = await bookModel.findOne({ _id: review.bookId },{ __v: 0, ISBN: 0 });
+    //if (data.matchedCount === 0)
+      let book = await bookModel.findOneAndUpdate(
         { _id: review.bookId },
         { $inc: { reviews: 1 } },
         { new: true }
-      );
-    book._doc.reviewsData = await reviewModel.find(
-      { bookId: book._id,isDeleted:false},
-      { __v: 0 }
-    );
+      ).select({__v:0,ISBN:0})
+    book._doc.reviewsData = data;
     res.status(201).send({ status: true, message: "Books List", data: book });
   } catch (err) {
     return res.status(500).send({ status: false, message: err.message });
@@ -129,6 +117,10 @@ const updateReview=async (req, res) => {
       if(!isValidObjectId(bookId))return res
       .status(400)
       .send({ status: false, message: "Invalid BookId" });
+      let book=await bookModel.findOne({_id:bookId,isDeleted:false})
+      if(!book)return res
+      .status(400)
+      .send({ status: false, message: "BookId does not exist" });
 
       if(!isValidObjectId(reviewId))return res
       .status(400)
@@ -160,7 +152,7 @@ const updateReview=async (req, res) => {
       if (rating ){
       if(!(Number(rating) >= 1 && Number(rating) <= 5))
         return res.status(400).send({ status: false, message: "Invalid Rating" });
-        updateReviews.rating=rating
+        updateReviews.rating=Math.round(rating*10)/10
       }
   
       if (reviewedBy) {
@@ -182,8 +174,9 @@ const updateReview=async (req, res) => {
       return res
       .status(404)
       .send({ status: false, message: "Review not found" });
-
-      res.status(200).send({status: true, message: "Success",data:updatedReview})   
+      
+      book._doc.reviewsData=updatedReview;
+      res.status(200).send({status: true, message: "Success",data:book})   
 
 
   }catch(err){
