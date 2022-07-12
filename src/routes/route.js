@@ -29,6 +29,11 @@ router.delete("/books/:bookId", userAuthentication, authorization, deleteBook);
 // REVIEW API
 router.post("/books/:bookId/review", createReview);
 router.put("/books/:bookId/review/:reviewId", updateReview);
-router.delete("/books/:bookId/review/:reviewId",reviewDeleteById);
+router.delete("/books/:bookId/review/:reviewId", reviewDeleteById);
+
+// validating the route
+router.all("/**", function (req, res) {
+  res.status(400).send({ status: false, message: "invalid http request" });
+});
 
 module.exports = router;
