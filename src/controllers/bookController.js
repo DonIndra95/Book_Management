@@ -202,7 +202,7 @@ const getBooks = async function (req, res) {
       } else
         return res
           .status(400)
-          .send({ status: false, msg: "Please enter valid subcategory" });
+          .send({ status: false, message: "Please enter valid subcategory" });
     }
 
     query.isDeleted = false;
@@ -221,7 +221,7 @@ const getBooks = async function (req, res) {
       })
       .sort({ title: 1 });
     if (!book.length) {
-      return res.status(404).send({ status: false, msg: "no such book exist" });
+      return res.status(404).send({ status: false, message: "no such book exist" });
     }
     return res
       .status(200)
@@ -239,12 +239,12 @@ const getBookById = async function (req, res) {
     if (!bookId)
       return res
         .status(400)
-        .send({ status: false, msg: "Please enter book ID in params" });
+        .send({ status: false, message: "Please enter book ID in params" });
 
     if (!isValidObjectId(bookId))
       return res
         .status(400)
-        .send({ status: false, msg: "Please enter valid book ID" });
+        .send({ status: false, message: "Please enter valid book ID" });
 
     // geting the book along with reviews data with help of aggregation
     const book = await bookModel.aggregate([
@@ -300,7 +300,7 @@ const getBookById = async function (req, res) {
     if (!book.length)
       return res
         .status(404)
-        .send({ status: false, msg: "No such book found" });
+        .send({ status: false, message: "No such book found" });
 
     res
       .status(200)
