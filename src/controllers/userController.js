@@ -11,6 +11,7 @@ const {
   isValidPincode,
 } = require("../validator/validations");
 
+//------------------------------------------Register User------------------------------------------
 const createUser = async function (req, res) {
   try {
     // checking for valid input
@@ -82,7 +83,7 @@ const createUser = async function (req, res) {
     user.password = password;
 
     // validation of address
-    if (address&&Object.keys(address).length) {
+    if (address && Object.keys(address).length) {
       if (address.street) {
         if (!isValid(address.street))
           return res.status(400).send({
@@ -124,14 +125,16 @@ const createUser = async function (req, res) {
       user.phone = phone;
     }
 
+    // creating new user
     const savedData = await userModel.create(user);
     res.status(201).send({ status: true, message: "Sucess", data: savedData });
   } catch (err) {
-    console.log(err)
+    console.log(err);
     return res.status(500).send({ status: false, message: err.message });
   }
 };
 
+//------------------------------------------Login User------------------------------------------
 const userLogin = async function (req, res) {
   try {
     // checking for valid input
@@ -141,7 +144,7 @@ const userLogin = async function (req, res) {
         .send({ status: false, message: "Please enter emailId and password" });
 
     let { email, password } = req.body;
-    console.log(email)
+
     // validating email
     if (!email)
       return res
@@ -152,6 +155,7 @@ const userLogin = async function (req, res) {
       return res
         .status(400)
         .send({ status: false, message: "Please enter valid emailId " });
+
     // validating password
     if (!password)
       return res
@@ -162,6 +166,7 @@ const userLogin = async function (req, res) {
       return res
         .status(400)
         .send({ status: false, message: "Please enter valid password" });
+
     //checking if email and password is correct
     let checkUser = await userModel.findOne({
       email: email,
@@ -170,6 +175,7 @@ const userLogin = async function (req, res) {
 
     if (!checkUser)
       return res.status(404).send({ status: false, message: "User not found" });
+
     //creating token
     let token = jwt.sign(
       {

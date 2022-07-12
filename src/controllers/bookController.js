@@ -64,6 +64,7 @@ const createBook = async function (req, res) {
         .join(" ");
       book.excerpt = excerpt;
     }
+
     // userId validtion
     if (!userId)
       return res
@@ -120,7 +121,6 @@ const createBook = async function (req, res) {
         .send({ status: false, message: "Please enter subcategory" });
     if (subcategory) {
       let sub = convertToArray(subcategory);
-      console.log(sub);
       if (!sub)
         return res
           .status(400)
@@ -140,10 +140,10 @@ const createBook = async function (req, res) {
       });
     book.releasedAt = releasedAt;
 
+    // creating new book
     const savedData = await bookModel.create(book);
     res.status(201).send({ status: true, message: "Sucess", data: savedData });
   } catch (err) {
-    console.log(err);
     return res.status(500).send({ status: false, message: err.message });
   }
 };
@@ -173,7 +173,7 @@ const getBooks = async function (req, res) {
         });
     }
 
-    //console.log(typeof req.query.userId);
+    // validation for userId
     if (userId !== undefined) {
       if (!isValidObjectId(userId))
         return res
@@ -182,6 +182,7 @@ const getBooks = async function (req, res) {
       query.userId = userId;
     }
 
+    // validating category
     if (category !== undefined) {
       if (category.trim() === "" || !isValidName(category))
         return res
@@ -205,7 +206,6 @@ const getBooks = async function (req, res) {
     }
 
     query.isDeleted = false;
-    console.log(query);
 
     // serach query on book Model
     const book = await bookModel
@@ -234,6 +234,7 @@ const getBooks = async function (req, res) {
 // -------------------------------------get book by ID-------------------------------------
 const getBookById = async function (req, res) {
   try {
+    // validating bookId
     let bookId = req.params.bookId;
     if (!bookId)
       return res
@@ -245,6 +246,7 @@ const getBookById = async function (req, res) {
         .status(400)
         .send({ status: false, msg: "Please enter valid book ID" });
 
+    // geting the book along with reviews data with help of aggregation
     const book = await bookModel.aggregate([
       {
         $lookup: {
@@ -314,6 +316,7 @@ const updateBook = async function (req, res) {
   try {
     let bookId = req.book._id;
 
+    // validating input request
     if (!isValidRequest(req.body))
       return res
         .status(400)
@@ -322,7 +325,7 @@ const updateBook = async function (req, res) {
     let body = Object.keys(req.body);
     if (body.length) {
       let output = body.filter((ele) =>
-        ["title", "excerpt", "releasedAt","ISBN"].includes(ele)
+        ["title", "excerpt", "releasedAt", "ISBN"].includes(ele)
       );
       if (!output.length)
         return res.status(400).send({
@@ -334,10 +337,12 @@ const updateBook = async function (req, res) {
     let { title, excerpt, ISBN, releasedAt } = req.body;
 
     let book = {};
-    if(title?.length==0)return res
-    .status(400)
-    .send({ status: false, message: "Please enter title" });
 
+    // validating title
+    if (title?.length == 0)
+      return res
+        .status(400)
+        .send({ status: false, message: "Please enter title" });
     if (title) {
       if (!isValid(title))
         return res
@@ -351,9 +356,11 @@ const updateBook = async function (req, res) {
       book.title = title;
     }
 
-    if(excerpt?.length==0)return res
-    .status(400)
-    .send({ status: false, message: "Please enter excerpt" });
+    // validating excerpt
+    if (excerpt?.length == 0)
+      return res
+        .status(400)
+        .send({ status: false, message: "Please enter excerpt" });
     if (excerpt) {
       if (!isValid(excerpt))
         return res
@@ -364,11 +371,14 @@ const updateBook = async function (req, res) {
         .filter((word) => word)
         .join(" ");
     }
-    if(ISBN?.length==0)return res
-    .status(400)
-    .send({ status: false, message: "Please enter ISBN" });
+
+    // validating ISBN
+    if (ISBN?.length == 0)
+      return res
+        .status(400)
+        .send({ status: false, message: "Please enter ISBN" });
     if (ISBN) {
-      if (typeof ISBN != "string" ||!validator.isISBN(ISBN))
+      if (typeof ISBN != "string" || !validator.isISBN(ISBN))
         return res
           .status(400)
           .send({ status: false, message: "Please enter valid ISBN " });
@@ -380,9 +390,12 @@ const updateBook = async function (req, res) {
           .send({ status: false, message: `ISBN '${ISBN}' already exist` });
       book.ISBN = ISBN;
     }
-    if(releasedAt?.length==0)return res
-    .status(400)
-    .send({ status: false, message: "Please enter releasedAt" });
+
+    // validating released date
+    if (releasedAt?.length == 0)
+      return res
+        .status(400)
+        .send({ status: false, message: "Please enter releasedAt" });
     if (releasedAt) {
       if (!isValidDate(releasedAt))
         return res.status(400).send({
@@ -392,6 +405,7 @@ const updateBook = async function (req, res) {
       book.releasedAt = releasedAt;
     }
 
+    // updating book in book collection
     let updatedBook = await bookModel.findOneAndUpdate(
       { _id: bookId, isDeleted: false },
       book,
@@ -415,6 +429,10 @@ const updateBook = async function (req, res) {
 const deleteBook = async function (req, res) {
   try {
     let bookId = req.book._id;
+
+    // validating bookId
+    if (!isValidObjectId(bookId))
+      return res.status(400).send({ status: false, message: "Invalid BookId" });
 
     let deletedBook = await bookModel.findOneAndUpdate(
       { _id: bookId, isDeleted: false },

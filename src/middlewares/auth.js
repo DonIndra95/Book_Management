@@ -14,10 +14,13 @@ const userAuthentication = async function (req, res, next) {
 
     // validating the token
     jwt.verify(token, "project3group26", function (err, decoded) {
-      if (err){
-      let msg= err.message==="jwt expired"?"token is expired":"token is invalid";
+      if (err) {
+        let msg =
+          err.message === "jwt expired"
+            ? "token is expired"
+            : "token is invalid";
         return res.status(401).send({ status: false, message: msg });
-    }else {
+      } else {
         // creating an attribute in "req" to access the token outside the middleware
         req.token = decoded;
         next();
