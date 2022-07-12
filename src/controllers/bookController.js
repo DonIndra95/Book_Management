@@ -95,12 +95,12 @@ const createBook = async function (req, res) {
       return res
         .status(400)
         .send({ status: false, message: "Please enter valid ISBN " });
-    ISBN = changeIsbn10To13(ISBN);
+    ISBN = changeIsbn10To13(ISBN.trim().split(" ").filter(x=>x).join(""));
     let checkISBN = await bookModel.findOne({ ISBN: ISBN });
     if (checkISBN)
       return res
         .status(409)
-        .send({ status: false, message: `ISBN '${ISBN}' already exist` });
+        .send({ status: false, message: `ISBN '${req.body.ISBN}' already exist` });
     book.ISBN = ISBN;
 
     // category validation
@@ -297,11 +297,10 @@ const getBookById = async function (req, res) {
         },
       },
     ]);
-
-    if (!book)
+    if (!book.length)
       return res
         .status(404)
-        .send({ status: false, msg: "No sunch book found" });
+        .send({ status: false, msg: "No such book found" });
 
     res
       .status(200)

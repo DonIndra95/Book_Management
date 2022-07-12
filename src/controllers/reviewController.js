@@ -197,7 +197,7 @@ const updateReview = async (req, res) => {
       if (!output.length)
         return res.status(400).send({
           status: false,
-          message: "Please enter valid input in body",
+          message: "Please enter valid field in body",
         });
     }
     let updateReviews = {};

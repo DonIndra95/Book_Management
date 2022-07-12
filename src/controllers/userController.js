@@ -83,7 +83,19 @@ const createUser = async function (req, res) {
     user.password = password;
 
     // validation of address
-    if (address && Object.keys(address).length) {
+    if (address) {
+      let keys=Object.keys(address)
+      if(typeof address !=="object"||keys.length==0) return res.status(400).send({
+        status: false,
+        message: "Please enter valid address"});
+        let output = keys.filter((ele) =>
+        ["street", "city", "pincode"].includes(ele)
+      );
+      if (!output.length)
+        return res.status(400).send({
+          status: false,
+          message: "Please enter valid field in address",
+        });
       if (address.street) {
         if (!isValid(address.street))
           return res.status(400).send({
@@ -129,7 +141,6 @@ const createUser = async function (req, res) {
     const savedData = await userModel.create(user);
     res.status(201).send({ status: true, message: "Sucess", data: savedData });
   } catch (err) {
-    console.log(err);
     return res.status(500).send({ status: false, message: err.message });
   }
 };
