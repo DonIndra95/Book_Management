@@ -14,6 +14,7 @@ const bookSchema = new mongoose.Schema(
     category: { type: String, require: true, trim: true },
     subcategory: { type: [], require: true },
     reviews: { type: Number, default: 0 },
+    bookCover:{type:String},
     deletedAt: { type: Date },
     isDeleted: { type: Boolean, default: false },
     releasedAt: { type: Date, require: true },

@@ -1,4 +1,5 @@
 const express = require("express");
+const aws=require("aws-sdk")
 const {
   createBook,
   getBooks,
@@ -14,6 +15,12 @@ const {
   updateReview,
 } = require("../controllers/reviewController");
 const router = express.Router();
+
+aws.config.update({
+  accessKeyId:"AKIAY3L35MCRVFM24Q7U",
+  secretAccessKey:"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",
+  region:"ap-south-1"
+})
 
 // user API
 router.post("/register", createUser);

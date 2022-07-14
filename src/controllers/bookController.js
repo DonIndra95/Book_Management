@@ -12,19 +12,29 @@ const {
   isValidDate,
   changeIsbn10To13,
 } = require("../validator/validations");
+const { uploadFile } = require("../aws/aws");
 
 // --------------------------------------Create book--------------------------------------
 const createBook = async function (req, res) {
   try {
+    
     // Validating request body
     if (!isValidRequest(req.body))
       return res
         .status(400)
         .send({ status: false, message: "Please enter valid input" });
 
-    let { title, excerpt, userId, ISBN, category, subcategory, releasedAt } =
-      req.body;
+    let { title, excerpt, userId, ISBN, category, subcategory, releasedAt } =req.body;
     let book = {};
+
+    //Adding AWS URL to our book object
+    
+    let file=req.files;
+    if(file&& file.length>0){
+      let bookCover= await uploadFile(file[0]);
+      if(bookCover.error)return res.status(400).send({status:false,message:bookCover.error})
+      book.bookCover=bookCover;
+    }else return res.status(400).send({status:false,message:"Please upload file"})
 
     // title validation
     if (!title)
@@ -139,11 +149,12 @@ const createBook = async function (req, res) {
         message: "Please enter valid release date in YYYY-MM-DD format",
       });
     book.releasedAt = releasedAt;
-
+    
     // creating new book
     const savedData = await bookModel.create(book);
-    res.status(201).send({ status: true, message: "Sucess", data: savedData });
+    res.status(201).send({ status: true, message: "Success", data: savedData });
   } catch (err) {
+    console.log(err)
     return res.status(500).send({ status: false, message: err.message });
   }
 };
@@ -218,7 +229,7 @@ const getBooks = async function (req, res) {
         category: 1,
         reviews: 1,
         releasedAt: 1,
-      })
+      }).collation({locale:"en"})
       .sort({ title: 1 });
     if (!book.length) {
       return res.status(404).send({ status: false, message: "no such book exist" });
